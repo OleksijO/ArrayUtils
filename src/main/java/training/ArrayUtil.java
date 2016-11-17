@@ -2,6 +2,10 @@ package training;
 
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
+import static java.util.stream.Collectors.counting;
+import static java.util.stream.Collectors.groupingBy;
 
 /**
  * This class contains  static method utils for arrays
@@ -178,6 +182,32 @@ public class ArrayUtil {
         });
 
         return sortedElements.stream().mapToInt(i -> i).toArray();
+    }
+
+    /**
+     * Sorts int array by number of element occurrences number.
+     * Uses stream api.
+     *
+     * @param array array to sort
+     * @return sorted by element occurrence number array
+     */
+    public static int[] sortArrayByNumberOfOccurrencesWithStreamApi(int[] array) {
+
+        Objects.requireNonNull(array);
+        Map<Integer, Long> map = Arrays.stream(array).boxed()
+                .collect(groupingBy(e -> e, counting()));
+        Stream<Map.Entry<Integer, Long>> entries = map.entrySet().stream()
+                .sorted((e1, e2) -> Long.compare(e1.getValue(), e2.getValue()));
+
+        int counter[] = new int[1];
+
+        entries.forEachOrdered(entry -> {
+            for (int i = 0; i < entry.getValue(); i++) {
+                array[counter[0]++] = entry.getKey();
+            }
+        });
+
+        return array;
     }
 
 }

@@ -90,15 +90,16 @@ public class ArrayUtilTest {
     }
 
     /**
-     * Compare of execution time of
-     * 1) sorting with iteration method
+     * Compare of execution time of finding different values
+     * 1)  with iteration method
      * 2) using hash set and collections methods
      * 3) using hashMap of one array without sorting
+     * Compare of execution time of sorting
      */
     @Ignore
     @Test
-    public void testMethodsSpeed() {
-        int array1Length = 1000000;
+    public void testFindMethodsSpeed() {
+        int array1Length = 10000000;
         int array2Length = array1Length;
         int array1[] = initArray(array1Length);
         int array2[] = initArray(array2Length);
@@ -112,9 +113,56 @@ public class ArrayUtilTest {
         start = System.currentTimeMillis();
         result = ArrayUtil.findDifferentValuesUsingHash(array1, array2);
         System.out.println("Time for hash map find different method: " + (System.currentTimeMillis() - start));
+
+    }
+
+    /**
+     * Compare of execution time of sorting
+     * 1)  using collections
+     * 2) using streams
+     * 3) using hashMap of one array without sorting
+     * Compare of execution time of sorting
+     * 4)
+     */
+    @Ignore
+    @Test
+    public void testSortMethodsSpeed() {
+        int array1Length = 1000000;
+        int array2Length = array1Length;
+        int array1[] = initArray(array1Length);
+        int array2[] = initArray(array2Length);
+
+
+        int[] array1copy=new int[array1.length];
+        System.arraycopy(array1,0,array1copy,0,array1.length);
+        int[] array2copy=new int[array1.length];
+        System.arraycopy(array1,0,array1copy,0,array1.length);
+        long start;
+
+
         start = System.currentTimeMillis();
         ArrayUtil.sortArrayByNumberOfOccurrences(array1);
-        System.out.println("Time for sorting array by element occurrence number: " + (System.currentTimeMillis() - start));
+        System.out.println("Time for sorting array by element occurrence number using collections: " + (System.currentTimeMillis() - start));
+
+        start = System.currentTimeMillis();
+        ArrayUtil.sortArrayByNumberOfOccurrences(array2);
+        System.out.println("Time for sorting array by element occurrence number using collections: " + (System.currentTimeMillis() - start));
+
+        start = System.currentTimeMillis();
+        ArrayUtil.sortArrayByNumberOfOccurrences(array2);
+        System.out.println("Time for sorting SORTED array by element occurrence number using collections: " + (System.currentTimeMillis() - start));
+
+        start = System.currentTimeMillis();
+        ArrayUtil.sortArrayByNumberOfOccurrencesWithStreamApi(array1copy);
+        System.out.println("Time for sorting array by element occurrence number using streams: " + (System.currentTimeMillis() - start));
+
+        start = System.currentTimeMillis();
+        ArrayUtil.sortArrayByNumberOfOccurrencesWithStreamApi(array2copy);
+        System.out.println("Time for sorting array by element occurrence number using streams: " + (System.currentTimeMillis() - start));
+
+        start = System.currentTimeMillis();
+        ArrayUtil.sortArrayByNumberOfOccurrencesWithStreamApi(array2copy);
+        System.out.println("Time for sorting SORTED array by element occurrence number using streams: " + (System.currentTimeMillis() - start));
 
 
     }
@@ -141,6 +189,22 @@ public class ArrayUtilTest {
         array = new int[]{1, 100, 2, 100, 1, 1000};
         arraySorted = new int[]{2, 1000, 1, 1, 100, 100};
         assertArrayEquals(arraySorted, ArrayUtil.sortArrayByNumberOfOccurrences(array));
+    }
+
+    @Test
+    public void testSortArrayByNumberOfOccurrencesWithStreamApi() {
+        int array[] = {1};
+        assertArrayEquals(array, ArrayUtil.sortArrayByNumberOfOccurrencesWithStreamApi(array));
+        array = new int[]{1, 1, 1, 1};
+        assertArrayEquals(array, ArrayUtil.sortArrayByNumberOfOccurrencesWithStreamApi(array));
+        array = new int[]{1, 1, 2, 2, 3, 3};
+        assertArrayEquals(array, ArrayUtil.sortArrayByNumberOfOccurrencesWithStreamApi(array));
+        array = new int[]{3, 3, 2, 3, 2, 1};
+        int arraySorted[] = new int[]{1, 2, 2, 3, 3, 3};
+        assertArrayEquals(arraySorted, ArrayUtil.sortArrayByNumberOfOccurrencesWithStreamApi(array));
+        array = new int[]{1, 100, 2, 100, 1, 1000};
+        arraySorted = new int[]{2, 1000, 1, 1, 100, 100};
+        assertArrayEquals(arraySorted, ArrayUtil.sortArrayByNumberOfOccurrencesWithStreamApi(array));
     }
 
 }
