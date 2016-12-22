@@ -6,6 +6,7 @@ import org.junit.Test;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Locale;
 
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
@@ -207,4 +208,10 @@ public class ArrayUtilTest {
         assertArrayEquals(arraySorted, ArrayUtil.sortArrayByNumberOfOccurrencesWithStreamApi(array));
     }
 
+    @Test
+    public void locale(){
+        Locale locale= Locale.getDefault();
+        System.out.println(locale);
+        System.out.println(locale.getDisplayName());
+    }
 }
