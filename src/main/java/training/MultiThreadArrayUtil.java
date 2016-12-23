@@ -36,7 +36,7 @@ public class MultiThreadArrayUtil {
     /**
      * Counts ArraySum in several threads
      *
-     * @param array array to count sum of its elements
+     * @param array         array to count sum of its elements
      * @param threadsNumber Number of threads, which will be created to perform count
      * @return The sum of array's elements.
      */
@@ -102,12 +102,12 @@ public class MultiThreadArrayUtil {
     /**
      * Counts ArraySum in several threads to One atomic var
      *
-     * @param array array to count sum of its elements
+     * @param array         array to count sum of its elements
      * @param threadsNumber Number of threads, which will be created to perform count
      * @return The sum of array's elements.
      */
     public static long countSumWithSpecifiedNumberOfThreadsToAtomicVar(int[] array, int threadsNumber) {
-        AtomicLong sum=new AtomicLong(0);
+        AtomicLong sum = new AtomicLong(0);
         List<SumToAtomicCounter> counters = createSumToAtomicCounters(array, threadsNumber, sum);
         startCount(counters);
         waitForAllDone(counters);
@@ -117,7 +117,7 @@ public class MultiThreadArrayUtil {
     private static List<SumToAtomicCounter> createSumToAtomicCounters(int[] array, int threadsNumber, AtomicLong sum) {
         List<SumToAtomicCounter> counters = new ArrayList<>();
         for (int i = 0; i < threadsNumber; i++) {
-            counters.add(new SumToAtomicCounter(array, i, threadsNumber,sum));
+            counters.add(new SumToAtomicCounter(array, i, threadsNumber, sum));
         }
         return counters;
     }
@@ -136,7 +136,7 @@ public class MultiThreadArrayUtil {
             this.sum = sum;
         }
 
-         @Override
+        @Override
         public void run() {
             for (int i = offset; i < array.length; i += interval) {
                 sum.getAndAdd(array[i]);
@@ -145,7 +145,7 @@ public class MultiThreadArrayUtil {
     }
 
     public static long countSumWithSpecifiedNumberOfThreadsToAtomicVarCAS(int[] array, int threadNumber) {
-        AtomicLong sum=new AtomicLong(0);
+        AtomicLong sum = new AtomicLong(0);
         List<SumToAtomicCounterCAS> counters = createSumToAtomicCountersCAS(array, threadNumber, sum);
         startCount(counters);
         waitForAllDone(counters);
@@ -155,10 +155,28 @@ public class MultiThreadArrayUtil {
     private static List<SumToAtomicCounterCAS> createSumToAtomicCountersCAS(int[] array, int threadsNumber, AtomicLong sum) {
         List<SumToAtomicCounterCAS> counters = new ArrayList<>();
         for (int i = 0; i < threadsNumber; i++) {
-            counters.add(new SumToAtomicCounterCAS(array, i, threadsNumber,sum));
+            counters.add(new SumToAtomicCounterCAS(array, i, threadsNumber, sum));
         }
         return counters;
     }
+
+    public static long countSumWithSpecifiedNumberOfThreadsToAtomicVarCAS2(int[] array, int threadNumber) {
+        AtomicLong sum = new AtomicLong(0);
+        List<SumToAtomicCounterCAS2> counters = createSumToAtomicCountersCAS2(array, threadNumber, sum);
+        startCount(counters);
+        waitForAllDone(counters);
+        return sum.get();
+    }
+
+    private static List<SumToAtomicCounterCAS2> createSumToAtomicCountersCAS2(int[] array, int threadsNumber, AtomicLong sum) {
+        List<SumToAtomicCounterCAS2> counters = new ArrayList<>();
+        for (int i = 0; i < threadsNumber; i++) {
+            counters.add(new SumToAtomicCounterCAS2(array, i, threadsNumber, sum));
+        }
+        return counters;
+    }
+
+
 
     static class SumToAtomicCounterCAS extends Thread {
         private int[] array;
@@ -178,11 +196,48 @@ public class MultiThreadArrayUtil {
             long expected;
             long newValue;
             for (int i = offset; i < array.length; i += interval) {
-                do{
+                do {
                     expected = sum.get();
-                    newValue = expected+array[i];
-                } while (!sum.compareAndSet(expected,newValue));
+                    newValue = expected + array[i];
+                } while (!sum.compareAndSet(expected, newValue));
             }
+        }
+    }
+
+    static class SumToAtomicCounterCAS2 extends Thread {
+        private int[] array;
+        int offset;
+        int interval;
+        AtomicLong sum;
+
+        public SumToAtomicCounterCAS2(int[] array, int offset, int interval, AtomicLong sum) {
+            this.array = array;
+            this.offset = offset;
+            this.interval = interval;
+            this.sum = sum;
+        }
+
+        @Override
+        public void run() {
+            long expected;
+            long newValue;
+            long nonAddedSum = 0;
+            for (int i = offset; i < array.length; i += interval) {
+                expected = sum.get();
+                nonAddedSum += array[i];
+                newValue = expected + nonAddedSum;
+                if (sum.compareAndSet(expected, newValue)) {
+                    nonAddedSum = 0;
+                }
+
+            }
+            if (nonAddedSum>0){
+                do {
+                    expected = sum.get();
+                    newValue = expected + nonAddedSum;
+                } while (!sum.compareAndSet(expected, newValue));
+            }
+
         }
     }
 
